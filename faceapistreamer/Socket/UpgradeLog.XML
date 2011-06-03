@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Socket">
+</Property><Property Name="Solution File" Value="C:\temp\6dofstreamer\faceapistreamer\Socket\Socket.sln">
+</Property><Property Name="Date" Value="31 May 2011">
+</Property><Property Name="Time" Value="13:23:25">
+</Property></Properties><Event ErrorLevel="3" Project="Socket" Source="Socket.vcproj" Description="No Conversion Required">
+</Event></UpgradeLog>
