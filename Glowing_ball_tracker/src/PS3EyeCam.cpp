@@ -75,7 +75,8 @@ void CLEyeCameraCapture::StopCapture()
 void CLEyeCameraCapture::setupParams()
 {
 	threshold_image = cvCreateImage(cvGetSize(pCapImage),IPL_DEPTH_8U,1);
-	imgHSV = cvCreateImage(cvGetSize(pCapImage), IPL_DEPTH_8U, 3);
+    contour_image = cvCreateImage(cvGetSize(pCapImage),IPL_DEPTH_8U,1);
+    imgHSV = cvCreateImage(cvGetSize(pCapImage), IPL_DEPTH_8U, 3);
 	image_roi = Mat(w,h,CV_8UC1,Scalar(0,0,0));
 	circles.resize(1); //sino peta en debug
 	radius=9999;
@@ -99,45 +100,48 @@ void CLEyeCameraCapture::opening()
 void CLEyeCameraCapture::find_ball()
 {
 	
-    CvMemStorage* storageContours = cvCreateMemStorage(0);
-    CvSeq* contours;
-    
-    cvFindContours(threshold_image ,storageContours,&contours,sizeof(CvContour),CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
-    CvSeq* tmpcontours=contours;
+	CvMemStorage* storageContours = cvCreateMemStorage(0);
+	CvSeq* contours;
+	
+    cvCopyImage(threshold_image, contour_image);
 
-    for( ; tmpcontours != 0; tmpcontours = tmpcontours->h_next ){
+	cvFindContours(contour_image ,storageContours,&contours,sizeof(CvContour),CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
+	CvSeq* tmpcontours=contours;
 
-            // Approximates polygonal curves with desired precision
-            CvSeq* result = cvApproxPoly(tmpcontours, sizeof(CvContour), storageContours, CV_POLY_APPROX_DP, cvContourPerimeter(tmpcontours)*0.02, 0);
-                
-            double reg = fabs(cvContourArea(result, CV_WHOLE_SEQ));
+	for( ; tmpcontours != 0; tmpcontours = tmpcontours->h_next ){
+
+			// Approximates polygonal curves with desired precision
+			CvSeq* result = cvApproxPoly(tmpcontours, sizeof(CvContour), storageContours, CV_POLY_APPROX_DP, cvContourPerimeter(tmpcontours)*0.01, 0);
+				
+			double reg = fabs(cvContourArea(result, CV_WHOLE_SEQ));
 
 //          check if contour is big enough
-            if( reg< (2000) ) { 
-                    //cout << "skip" << endl;
-                    continue;
-                        
-            }
+			if( reg < (2000) ) { 
+					//cout << "skip" << endl;
+                    printf("Contour is too small : %i", reg);
+					continue;
+						
+			}
 
-            CvRect rectEst = cvBoundingRect( tmpcontours, 0 );
-            /*rectEst.x *= (int)fac;
-            rectEst.y *= (int)fac;
-            rectEst.width *= (int)fac;
-            rectEst.height *= (int)fac;*/
+			CvRect rectEst = cvBoundingRect( tmpcontours, 0 );
+			/*rectEst.x *= (int)fac;
+			rectEst.y *= (int)fac;
+			rectEst.width *= (int)fac;
+			rectEst.height *= (int)fac;*/
 
-            CvPoint pt1,pt2;
-            pt1.x = rectEst.x;
-            pt1.y = rectEst.y;
-            pt2.x = rectEst.x+ rectEst.width;
-            pt2.y = rectEst.y+ rectEst.height;
+			CvPoint pt1,pt2;
+			pt1.x = rectEst.x;
+			pt1.y = rectEst.y;
+			pt2.x = rectEst.x+ rectEst.width;
+			pt2.y = rectEst.y+ rectEst.height;
 
-            int thickness =1 ;
-            cvRectangle( pCapImage, pt1, pt2, CV_RGB(255,255,255 ), thickness );
-                
-            //////////////////////////////////////////////////////////////////////////////////
-                
-    }
-    
+			int thickness =1 ;
+			cvRectangle( pCapImage, pt1, pt2, CV_RGB(255,255,255 ), thickness );
+				
+			//////////////////////////////////////////////////////////////////////////////////
+				
+	}
+	
 
 	/*printf("X: %f\n",ball[0]);
 	printf("Y: %f\n",ball[1]);
@@ -154,8 +158,7 @@ void CLEyeCameraCapture::find_ball()
 	cvFlip(threshold_image,threshold_image,1);
 	cvFlip(pCapImage,pCapImage,1);
 
-	cvShowImage("mask_window", threshold_image);
-	//cvShowImage("calibration_window",0);
+	cvShowImage("mask_window", contour_image);
 	cvShowImage("calibration_window",threshold_image);
 	cvShowImage(_windowName, pCapImage);
 }
@@ -254,7 +257,7 @@ int main(int argc, char* argv[])
 	int key;
 	while((key = cvWaitKey(10)) != 0x1b){}
 
-    
+	
 	printf("Stopping capture on camera\n");
 	cam->StopCapture();
 	delete cam;

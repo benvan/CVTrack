@@ -59,7 +59,7 @@ class CLEyeCameraCapture
 		int mode;
 
 		Vec3f ball;
-		IplImage *threshold_image, *imgHSV;
+		IplImage *threshold_image, *imgHSV, *contour_image;
 		Mat Hough_mat,threshold_image_mat;
 		Mat image_roi;
 		vector<Vec3f> circles;
