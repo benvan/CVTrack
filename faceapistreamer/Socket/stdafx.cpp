@@ -10,3 +10,5 @@
 #include "SocketConnector.h"
 #include "TennisWatcher.h"
 
+#include "CLEyeMulticam.h"
+

@@ -42,3 +42,4 @@
 #include <cassert>
 #include <conio.h>
 #include "sm_api.h"
+#include "CLEyeMulticam.h"
