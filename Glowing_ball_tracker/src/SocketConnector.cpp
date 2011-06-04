@@ -55,7 +55,7 @@ int SocketConnector::initializeConnector(){
 			
 	Sleep(15);
 	EnterCriticalSection(&ballCriticalSection);
-	sprintf(sentbuf, "%lf %lf %lf" ,ball->x, ball->y, ball->z);
+	sprintf(sentbuf, "%lf %lf %lf" ,ball->x, ball->y, ball->size);
 	LeaveCriticalSection(&ballCriticalSection);
 	sockaddr_in RecvAddr;
 	RecvAddr.sin_family = AF_INET;

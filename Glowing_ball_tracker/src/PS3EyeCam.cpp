@@ -1,4 +1,16 @@
+#include "stdafx.h"
+#include "SocketConnector.h"
+#include "Ball.h"
 #include "PS3EyeCam.h"
+
+using namespace std;
+
+CRITICAL_SECTION criticalSection;
+Ball* ball;
+
+void createSocket( void* parameter ){
+    SocketConnector socketConnector(criticalSection, ball);
+}
 
 void CLEyeCameraCapture::setupWindows()
 {
@@ -108,6 +120,9 @@ void CLEyeCameraCapture::find_ball()
 	cvFindContours(contour_image ,storageContours,&contours,sizeof(CvContour),CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
 	CvSeq* tmpcontours=contours;
 
+    double regMax = 0;
+    CvPoint pt1,pt2;
+
 	for( ; tmpcontours != 0; tmpcontours = tmpcontours->h_next ){
 
 			// Approximates polygonal curves with desired precision
@@ -116,31 +131,55 @@ void CLEyeCameraCapture::find_ball()
 			double reg = fabs(cvContourArea(result, CV_WHOLE_SEQ));
 
 //          check if contour is big enough
-			if( reg < (2000) ) { 
+			if( reg < (1000) ) { 
 					//cout << "skip" << endl;
-                    printf("Contour is too small : %i", reg);
+                    //printf("Contour is too small : %i\n", reg);
 					continue;
 						
 			}
 
-			CvRect rectEst = cvBoundingRect( tmpcontours, 0 );
-			/*rectEst.x *= (int)fac;
-			rectEst.y *= (int)fac;
-			rectEst.width *= (int)fac;
-			rectEst.height *= (int)fac;*/
+            if (reg > regMax){
+                regMax = reg;
+                CvRect rectEst = cvBoundingRect( tmpcontours, 0 );
 
-			CvPoint pt1,pt2;
-			pt1.x = rectEst.x;
-			pt1.y = rectEst.y;
-			pt2.x = rectEst.x+ rectEst.width;
-			pt2.y = rectEst.y+ rectEst.height;
-
-			int thickness =1 ;
-			cvRectangle( pCapImage, pt1, pt2, CV_RGB(255,255,255 ), thickness );
-				
-			//////////////////////////////////////////////////////////////////////////////////
+                pt1.x = rectEst.x;
+                pt1.y = rectEst.y;
+                pt2.x = rectEst.x+ rectEst.width;
+                pt2.y = rectEst.y+ rectEst.height;
+            }
 				
 	}
+
+    if (regMax != 0){
+        int thickness =1 ;
+        cvRectangle( pCapImage, pt1, pt2, CV_RGB(255,255,255 ), thickness );
+
+        int hor = pt2.x - pt1.x;
+        int vert = pt2.y - pt1.y;
+        int size = max(hor,vert);
+
+        int x = pt1.x + (hor / 2);
+        int y = pt1.y + (vert / 2);
+
+        // Make output readable
+        fixed(cout);
+        showpos(cout);
+        cout.precision(2);
+
+        cout << "Ball: ";
+        cout << x << ",";
+        cout << y << ",";
+        cout << size << ") ";
+        cout << endl;
+
+        EnterCriticalSection(&criticalSection);
+        ball->x  = x;
+        ball->y  = y;
+        ball->size  = size;
+        LeaveCriticalSection(&criticalSection);
+
+    }
+    
 	
 
 	/*printf("X: %f\n",ball[0]);
@@ -251,7 +290,16 @@ int main(int argc, char* argv[])
 	// Create camera capture object
 	cam = new CLEyeCameraCapture("Camera Window", CLEyeGetCameraUUID(0), CLEYE_COLOR_RAW, CLEYE_VGA, 60);
 	//cam = new CLEyeCameraCapture("Camera Window", CLEyeGetCameraUUID(0), CLEYE_COLOR_RAW, CLEYE_QVGA, 125);
-	
+
+    InitializeCriticalSection(&criticalSection);
+
+    ball = new Ball();
+    ball->x = 0.5f;
+    ball->y = 40.0f;
+    ball->size = 40.0f;
+
+    _beginthread(createSocket,0,NULL);
+    
 	cam->StartCapture();
 
 	// The <ESC> key will exit the program

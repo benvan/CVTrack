@@ -53,7 +53,6 @@ class CLEyeCameraCapture
 		int gain, exposure;
 		int mode;
 
-		Vec3f ball;
 		IplImage *threshold_image, *imgHSV, *contour_image;
 		Mat Hough_mat,threshold_image_mat;
 		Mat image_roi;
@@ -61,7 +60,7 @@ class CLEyeCameraCapture
         CvMemStorage* storageContours;
         CvSeq* contours;
 		Point center,pos_rectangle_roi;
-		Vec3f last_ball1,last_ball2,last_ball3;
+		
 		int radius;
 		bool using_image_roi;
 		DWORD oldTime, newTime;

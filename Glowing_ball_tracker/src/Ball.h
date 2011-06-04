@@ -6,6 +6,6 @@ class Ball
 
 public:
     Ball(void);
-    double x,y,z;
+    double x,y,size;
     ~Ball(void);
 };
