@@ -63,6 +63,8 @@ class CLEyeCameraCapture
 		Mat Hough_mat,threshold_image_mat;
 		Mat image_roi;
 		vector<Vec3f> circles;
+        CvMemStorage* storageContours;
+        CvSeq* contours;
 		Point center,pos_rectangle_roi;
 		Vec3f last_ball1,last_ball2,last_ball3;
 		int radius;

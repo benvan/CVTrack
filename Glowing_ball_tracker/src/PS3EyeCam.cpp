@@ -78,6 +78,7 @@ void CLEyeCameraCapture::setupParams()
     contour_image = cvCreateImage(cvGetSize(pCapImage),IPL_DEPTH_8U,1);
     imgHSV = cvCreateImage(cvGetSize(pCapImage), IPL_DEPTH_8U, 3);
 	image_roi = Mat(w,h,CV_8UC1,Scalar(0,0,0));
+    storageContours = cvCreateMemStorage(0);
 	circles.resize(1); //sino peta en debug
 	radius=9999;
 	oldTime=0; newTime=0;
@@ -100,8 +101,7 @@ void CLEyeCameraCapture::opening()
 void CLEyeCameraCapture::find_ball()
 {
 	
-	CvMemStorage* storageContours = cvCreateMemStorage(0);
-	CvSeq* contours;
+	
 	
     cvCopyImage(threshold_image, contour_image);
 
@@ -166,6 +166,7 @@ void CLEyeCameraCapture::find_ball()
 void CLEyeCameraCapture::destroyMyImages()
 {
 	cvReleaseImage(&threshold_image);
+    cvReleaseImage(&contour_image);
 	cvReleaseImage(&imgHSV);
 }
 
