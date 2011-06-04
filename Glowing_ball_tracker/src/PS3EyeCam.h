@@ -1,13 +1,8 @@
 #ifndef INC_PS3EYECAM_H
 #define INC_PS3EYECAM_H
 
-#include <stdio.h>
-#include <windows.h>
+#include "stdafx.h"
 
-#include <cv.h>
-#include <highgui.h>
-
-#include "CLEyeMulticam.h"
 
 using namespace cv;
 
